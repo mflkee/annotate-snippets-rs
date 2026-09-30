@@ -2,6 +2,7 @@ mod ann_eof;
 mod ann_insertion;
 mod ann_multiline;
 mod ann_multiline2;
+mod ann_multiline_overlapping;
 mod ann_removed_nl;
 mod ensure_emoji_highlight_width;
 mod first_snippet_is_primary;

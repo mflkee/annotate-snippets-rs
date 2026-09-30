@@ -199,6 +199,7 @@ impl<'a> SourceMap<'a> {
                     start: lo,
                     end: hi,
                     kind,
+                    label_kind: kind,
                     label,
                     annotation_type: LineAnnotationType::Singleline,
                     highlight_source,
@@ -210,6 +211,7 @@ impl<'a> SourceMap<'a> {
                     start: lo,
                     end: hi,
                     kind,
+                    label_kind: kind,
                     label,
                     overlaps_exactly: false,
                     highlight_source,
@@ -572,7 +574,16 @@ pub(crate) struct MultilineAnnotation<'a> {
     pub depth: usize,
     pub start: Loc,
     pub end: Loc,
+    /// The kind used to draw this annotation's graphics (its underline and the
+    /// vertical lines connecting its start to its end). Annotations that span
+    /// exactly the same range as a `Primary` one are promoted to `Primary` so
+    /// that the merged group is drawn with the primary styling.
     pub kind: AnnotationKind,
+    /// The kind of the annotation, kept as-is even when the annotation is
+    /// merged with duplicates (see `kind`). Used to color its label, so that
+    /// e.g. a `Context` annotation is not styled as `Primary` just because a
+    /// `Primary` annotation covers the same range.
+    pub label_kind: AnnotationKind,
     pub label: Option<Cow<'a, str>>,
     pub overlaps_exactly: bool,
     pub highlight_source: bool,
@@ -598,6 +609,7 @@ impl<'a> MultilineAnnotation<'a> {
                 byte: self.start.byte + 1,
             },
             kind: self.kind,
+            label_kind: self.label_kind,
             label: None,
             annotation_type: LineAnnotationType::MultilineStart(self.depth),
             highlight_source: self.highlight_source,
@@ -614,6 +626,7 @@ impl<'a> MultilineAnnotation<'a> {
             },
             end: self.end,
             kind: self.kind,
+            label_kind: self.label_kind,
             label: self.label.clone(),
             annotation_type: LineAnnotationType::MultilineEnd(self.depth),
             highlight_source: self.highlight_source,
@@ -625,6 +638,7 @@ impl<'a> MultilineAnnotation<'a> {
             start: Loc::default(),
             end: Loc::default(),
             kind: self.kind,
+            label_kind: self.label_kind,
             label: None,
             annotation_type: LineAnnotationType::MultilineLine(self.depth),
             highlight_source: self.highlight_source,

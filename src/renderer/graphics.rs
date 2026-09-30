@@ -1323,7 +1323,7 @@ fn render_source_line(
     // 4 |   }
     //   |  _  test
     for &(pos, annotation) in &annotations_position {
-        let style = if annotation.is_primary() {
+        let style = if annotation.label_is_primary() {
             ElementStyle::LabelPrimary
         } else {
             ElementStyle::LabelSecondary
@@ -2450,6 +2450,12 @@ pub(crate) struct LineAnnotation<'a> {
     /// level
     pub kind: AnnotationKind,
 
+    /// The kind of the original annotation, before annotations that span
+    /// exactly the same range were merged (see `kind`). Labels are colored by
+    /// this kind, so that e.g. a `Context` annotation is not styled as
+    /// `Primary` just because a `Primary` annotation covers the same range.
+    pub label_kind: AnnotationKind,
+
     /// Optional label to display adjacent to the annotation.
     pub label: Option<Cow<'a, str>>,
 
@@ -2464,6 +2470,13 @@ pub(crate) struct LineAnnotation<'a> {
 impl LineAnnotation<'_> {
     pub(crate) fn is_primary(&self) -> bool {
         self.kind == AnnotationKind::Primary
+    }
+
+    /// Whether the label of this annotation should be styled as a primary one.
+    /// Unlike [`Self::is_primary`], this ignores the promotion that happens
+    /// when annotations spanning exactly the same range are merged.
+    pub(crate) fn label_is_primary(&self) -> bool {
+        self.label_kind == AnnotationKind::Primary
     }
 
     /// Whether this annotation is a vertical line placeholder.
